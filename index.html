@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WitherPacMan</title>
+    <style>
+        *
+        {   margin: 0;
+            padding: 0;
+            box-sizing: border-box;   
+        }
+        body
+        {   display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+        }
+        canvas
+        {   /* box-shadow: 0px 0px 10px white; */
+
+        }
+    </style>
+</head>
+<body>
+    <script>
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+        canvas.width = 1024;
+        canvas.height = 768;
+    </script>
+    <script src="functions.js"></script>
+    <script src="maze.js"></script>
+    <script src="entity.js"></script>
+    <script>
+        var timer = requestAnimationFrame(renderMaze);
+        var first =  maze[parseInt(rng()*maze.length)];
+        var path = [first];
+        var pacman = new PacMan({x:parseInt(Coluns/2), y:parseInt(Rows/2)});
+        var lastTime, deltaTime;
+        var ghost1 = new Ghost({x:parseInt(0), y:parseInt(0)}, 'red', 40, 5)
+        var ghost2 = new Ghost({x:parseInt(Coluns-1), y:parseInt(0)}, '#33FFFF', 120, 10)
+        var ghost3 = new Ghost({x:parseInt(0), y:parseInt(Rows-1)}, 'pink', 200, 30)
+        var ghost4 = new Ghost({x:parseInt(Coluns-1), y:parseInt(Rows-1)}, '#FFCC33', 120, 10)
+        var sla, porra;
+
+        function renderMaze(currentTime)
+        {   rect(0,0,canvas.width,canvas.height,'black');
+            for(let i = 0; i < maze.length; i++) maze[i].draw();
+
+            if(lastTime)
+            {   deltaTime = (currentTime - lastTime)/1000;
+                pacman.draw(), pacman.update();
+                
+                !path.length && (ghost1.draw(), ghost1.update());
+                !path.length && (ghost2.draw(), ghost2.update());
+                !path.length && (ghost3.draw(), ghost3.update());
+                !path.length && (ghost4.draw(), ghost4.update());
+            }
+            lastTime = currentTime;
+
+
+
+            if(!sla)    for(let i = 0; i<path.length;i++)   render(path[path.length-1]);
+            !path.length && (sla = 1);
+
+            if(sla) 
+            {   if(!porra)
+                    for (let i=0;i<maze.length;i++) maze[i].touch = 0, porra = 1, path.push(first);
+                for(let i = 0; i<path.length;i++) 
+                    render(path[path.length-1]);
+            }
+            
+            txt(0+30,0+30,pacman.points, 30,'white');
+            requestAnimationFrame(renderMaze);
+
+            cancelAnimationFrame(timer);
+        }
+    </script>
+</body>
+</html>
