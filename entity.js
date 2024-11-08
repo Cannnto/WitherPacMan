@@ -54,7 +54,7 @@ class PacMan extends Entity
         (this.yummy >= 45 || this.yummy <= 0) && (this.reverseYummy = !this.reverseYummy, (this.yummy >= 45 && (this.yummy = 45)) || (this.yummy = 0) );
         this.reverseYummy && (this.yummy -= this.animationVel*2 *deltaTime);
 
-        celPos(this).coin && (celPos(this).coin = 0, this.points++);
+        celPos(this).coin && (celPos(this).coin = 0, this.points++, wakawaka.play());
 
         if(key[87] && !this.moveAni) this.angle = -Math.PI/2, !celPos(this).walls.top && this.move(0,-1);
         if(key[83] && !this.moveAni) this.angle = Math.PI/2, !celPos(this).walls.bottom && this.move(0,+1);
@@ -71,24 +71,31 @@ class Ghost extends Entity
         this.position = [];
         this.options = options;
         this.moviments = moviments;
-        this.color = color
+        this.color = color;
+        this.lerp = {x:0, y:0};
     }
     draw()
-    {   bal(this.x+cellWidth/2, this.y+cellWidth/3.5, cellWidth/4,this.color);
-        rect(this.x+cellWidth/4,this.y+cellWidth/3.5, cellWidth/2, cellHeight/2.3);
-        ellipse(this.x+cellWidth/4+cellWidth/16, this.y+cellWidth/2+cellWidth/8, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
-        ellipse(this.x+cellWidth/4+cellWidth*3/16, this.y+cellWidth/2+cellWidth/8, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
-        ellipse(this.x+cellWidth/4+cellWidth*5/16, this.y+cellWidth/2+cellWidth/8, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
-        ellipse(this.x+cellWidth/4+cellWidth/16*7, this.y+cellWidth/2+cellWidth/8, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
-        // bal(this.x+cellWidth/2 - cellWidth/16, this.y+cellWidth/4, cellWidth/16,'white');
-        // bal(this.x+cellWidth/2 + cellWidth/8, this.y+cellWidth/4, cellWidth/16,'white');
-        GhostEye(this.x+cellWidth/2 - cellWidth/8, this.y+cellWidth/4-cellWidth/16, cellWidth/8, 'purple');
-        GhostEye(this.x+cellWidth/2 + cellWidth/16, this.y+cellWidth/4-cellWidth/16, cellWidth/8, 'purple');
+    {   bal(this.x+cellWidth/2+this.lerp.x, this.y+cellWidth/3.5+this.lerp.y, cellWidth/4, this.color);
+        rect(this.x+cellWidth/4+this.lerp.x, this.y+cellWidth/3.5+this.lerp.y, cellWidth/2, cellHeight/2.3);
+        ellipse(this.x+cellWidth/4+cellWidth/16+this.lerp.x, this.y+cellWidth/2+cellWidth/8+this.lerp.y, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
+        ellipse(this.x+cellWidth/4+cellWidth*3/16+this.lerp.x, this.y+cellWidth/2+cellWidth/8+this.lerp.y, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
+        ellipse(this.x+cellWidth/4+cellWidth*5/16+this.lerp.x, this.y+cellWidth/2+cellWidth/8+this.lerp.y, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
+        ellipse(this.x+cellWidth/4+cellWidth/16*7+this.lerp.x, this.y+cellWidth/2+cellWidth/8+this.lerp.y, cellWidth/16, cellWidth/12, 0, 0, Math.PI*2);
+        GhostEye(this.x+cellWidth/2 - cellWidth/8+this.lerp.x, this.y+cellWidth/4-cellWidth/16+this.lerp.y, cellWidth/8, 'purple');
+        GhostEye(this.x+cellWidth/2 + cellWidth/16+this.lerp.x, this.y+cellWidth/4-cellWidth/16+this.lerp.y, cellWidth/8, 'purple');
+        let sec = new Date().getTime() / 1000;
+        let pointA = {x:0, y: 5}, pointB = {x:0, y: -5};
+        let t = (Math.sin(sec*4)+1)/2;
+        lerp2(this.lerp, pointA, pointB, t)
+
     }
     update()
     {   this.moveAni && this.moveAnimation();
         this.ways = [];
         this.position = [];
+        
+
+        if(Math.sqrt((this.x - pacman.x)**2 + (this.y - pacman.y)**2) < cellWidth/2) return true;
         if(this.moveAni) return;
 
         //cria o template dos Paths 
@@ -129,11 +136,13 @@ class Ghost extends Entity
         for(let i=0; i<this.ways.length; i++)
             this.position[i] = Math.sqrt((this.position[i].x - pacman.x)**2 + (this.position[i].y - pacman.y)**2); 
 
+
+
         //executa o movimento
         this.ways[this.position.indexOf(Math.min(...this.position))][0] == 'L' && this.move(-1, 0);
         this.ways[this.position.indexOf(Math.min(...this.position))][0] == 'T' && this.move(0, -1);
         this.ways[this.position.indexOf(Math.min(...this.position))][0] == 'R' && this.move(1, 0);
-        this.ways[this.position.indexOf(Math.min(...this.position))][0] == 'B' && this.move(0, 1);  
+        this.ways[this.position.indexOf(Math.min(...this.position))][0] == 'B' && this.move(0, 1);
     }
 }
 

@@ -45,23 +45,16 @@
         var ghost3 = new Ghost({x:parseInt(0), y:parseInt(Rows-1)}, 'pink', 200, 30)
         var ghost4 = new Ghost({x:parseInt(Coluns-1), y:parseInt(Rows-1)}, '#FFCC33', 120, 10)
         var sla, porra;
+        var wakawaka = document.createElement("audio");
+        wakawaka.src = "PacmanWakaWaka04.mp3"
+        wakawaka.controls = false;
+        wakawaka.autoplay = false;
+        wakawaka.loop = false;
 
-        function renderMaze(currentTime)
-        {   rect(0,0,canvas.width,canvas.height,'black');
+        function renderMaze()
+        {   timer = requestAnimationFrame(renderMaze);
+            rect(0,0,canvas.width,canvas.height,'black');
             for(let i = 0; i < maze.length; i++) maze[i].draw();
-
-            if(lastTime)
-            {   deltaTime = (currentTime - lastTime)/1000;
-                pacman.draw(), pacman.update();
-                
-                !path.length && (ghost1.draw(), ghost1.update());
-                !path.length && (ghost2.draw(), ghost2.update());
-                !path.length && (ghost3.draw(), ghost3.update());
-                !path.length && (ghost4.draw(), ghost4.update());
-            }
-            lastTime = currentTime;
-
-
 
             if(!sla)    for(let i = 0; i<path.length;i++)   render(path[path.length-1]);
             !path.length && (sla = 1);
@@ -73,11 +66,37 @@
                     render(path[path.length-1]);
             }
             
-            txt(0+30,0+30,pacman.points, 30,'white');
-            requestAnimationFrame(renderMaze);
-
-            cancelAnimationFrame(timer);
+            !path.length && (cancelAnimationFrame(timer), requestAnimationFrame(game));
         }
-    </script>
+
+        game = (currentTime) =>
+        {   timer = requestAnimationFrame(game);
+            rect(0,0,canvas.width,canvas.height,'black');
+            for(let i = 0; i < maze.length; i++) maze[i].draw();
+            
+            if(lastTime)
+            {   deltaTime = (currentTime - lastTime)/1000;
+                pacman.draw(), pacman.update();
+                
+                ghost1.draw(), ghost1.update() && (cancelAnimationFrame(timer), requestAnimationFrame(end));
+                ghost2.draw(), ghost2.update() && (cancelAnimationFrame(timer), requestAnimationFrame(end));
+                ghost3.draw(), ghost3.update() && (cancelAnimationFrame(timer), requestAnimationFrame(end));
+                ghost4.draw(), ghost4.update() && (cancelAnimationFrame(timer), requestAnimationFrame(end));
+            }
+            lastTime = currentTime;
+
+            pacman.points == maze.length && (cancelAnimationFrame(timer), requestAnimationFrame(end));
+            txt(0+30, 0+30, pacman.points, 30, 'white');
+        }
+        
+        end = () => 
+        {   requestAnimationFrame(end);
+            let points = pacman.points == maze.length; 
+            points && txt(canvas.width/2, canvas.height/2-15, 'YOU WIN! CONGRATULATIONS!', 30, 'white');
+            !points && txt(canvas.width/2, canvas.height/2-15, 'YOU ARE DEAD!', 30, 'white');
+            txt(canvas.width/2, canvas.height/2+15, 'Press space to restart', 30, 'white');
+            key[32] && document.location.reload();
+        }
+        </script>
 </body>
 </html>
